@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>تحدي XO – العب وتعلّم</title>
+<style>
+:root{color-scheme:light;--bg:#fff7e6;--ink:#4a3b6b;--x:#ff6b8b;--xs:#ffe1e8;--o:#2bb3c9;--os:#d9f4f8;--sun:#ffd166;--mint:#bff0d4;--card:#fffdf8;--line:#f3dfb4;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Geeza Pro','Segoe UI','Noto Sans Arabic','Noto Naskh Arabic',Tahoma,Arial,sans-serif;font-weight:700}
+body{min-height:100vh;background:radial-gradient(circle at 10% 10%,#ffe9b8 0,transparent 35%),radial-gradient(circle at 92% 88%,#d9f4f8 0,transparent 38%),var(--bg)}
+button{font:inherit;cursor:pointer;border:0;color:var(--ink);touch-action:manipulation}
+.err{position:fixed;inset:auto 10px 10px 10px;z-index:99;background:#fff3cf;border:3px solid var(--sun);border-radius:18px;padding:10px 14px;font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:14px 16px 28px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+h1{font-family:'Geeza Pro','Segoe UI','Noto Sans Arabic','Noto Naskh Arabic',Tahoma,Arial,sans-serif;font-weight:800;font-size:clamp(30px,6vw,52px);margin:0;color:var(--ink);letter-spacing:0}
+h1 .x{color:var(--x)}h1 .o{color:var(--o)}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:12px 20px;border-radius:999px;background:var(--sun);font-size:18px;box-shadow:0 4px 0 #e6b84a;transition:transform .1s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #e6b84a}
+.btn.mint{background:var(--mint);box-shadow:0 4px 0 #8fd6ac}
+.btn.pink{background:var(--xs);box-shadow:0 4px 0 #f2b3c2}
+.btn.blue{background:var(--os);box-shadow:0 4px 0 #9bd7e0}
+.btn.sm{padding:6px 12px;font-size:15px}
+.turn{display:flex;justify-content:center;gap:12px;margin:14px 0}
+.chip{padding:10px 26px;border-radius:999px;font-size:22px;background:#fff;border:3px solid var(--line);opacity:.55;transition:.2s}
+.chip.on{opacity:1;transform:scale(1.1)}
+.chip.X.on{background:var(--xs);border-color:var(--x);color:var(--x)}
+.chip.O.on{background:var(--os);border-color:var(--o);color:var(--o)}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(8px,2vw,16px);direction:ltr;width:min(100%,640px);margin:0 auto;padding:clamp(10px,2vw,18px);background:#fff;border-radius:32px;border:4px solid var(--line);box-shadow:0 10px 0 #efd9a6}
+.cell{aspect-ratio:1;border-radius:24px;background:var(--card);border:3px dashed var(--line);display:flex;align-items:center;justify-content:center;position:relative;font-family:'Geeza Pro','Segoe UI','Noto Sans Arabic','Noto Naskh Arabic',Tahoma,Arial,sans-serif;font-size:clamp(60px,16vw,130px);line-height:1;transition:transform .12s,background .2s}
+.cell:not(:disabled):hover{transform:scale(1.04);background:#fff3cf}
+.cell .n{position:absolute;top:8px;right:12px;font:800 clamp(14px,3vw,20px) 'Geeza Pro','Segoe UI','Noto Sans Arabic','Noto Naskh Arabic',Tahoma,Arial,sans-serif;color:#c9a95a}
+.cell .q{font:800 clamp(30px,8vw,56px) 'Geeza Pro','Segoe UI','Noto Sans Arabic','Noto Naskh Arabic',Tahoma,Arial,sans-serif;color:#e8c36d}
+.cell.X{background:var(--xs);border:3px solid var(--x);color:var(--x)}
+.cell.O{background:var(--os);border:3px solid var(--o);color:var(--o)}
+.cell.X,.cell.O{animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
+.cell.win{background:var(--sun);animation:pulse .7s infinite alternate}
+@keyframes pop{from{transform:scale(.2) rotate(-25deg)}to{transform:scale(1)}}
+@keyframes pulse{to{transform:scale(1.07)}}
+.hint{text-align:center;margin-top:16px;font-size:17px;opacity:.75}
+.ov{position:fixed;inset:0;background:rgba(255,236,190,.88);display:none;align-items:center;justify-content:center;padding:16px;z-index:20;overflow:auto}
+.ov.show{display:flex}
+.modal{background:#fff;border:5px solid var(--line);border-radius:36px;padding:clamp(18px,4vw,36px);width:min(100%,760px);max-height:94vh;overflow:auto;box-shadow:0 12px 0 #efd9a6;animation:rise .3s}
+@keyframes rise{from{transform:translateY(30px);opacity:0}}
+.qtag{display:inline-block;padding:6px 18px;border-radius:999px;font-size:20px;margin-bottom:12px}
+.qtag.X{background:var(--xs);color:var(--x)}.qtag.O{background:var(--os);color:var(--o)}
+.qtext{font-size:clamp(26px,5.2vw,44px);line-height:1.6;margin:6px 0 16px;white-space:pre-wrap}
+.qimg{display:block;max-width:100%;max-height:34vh;margin:0 auto 16px;border-radius:20px;border:3px solid var(--line)}
+.opts{display:grid;gap:10px;margin-bottom:18px}
+.opt{padding:14px 18px;border-radius:20px;background:var(--card);border:3px solid var(--line);font-size:clamp(20px,4vw,30px)}
+.opt.show{background:var(--mint);border-color:#6cc790}
+.ans{padding:14px 18px;border-radius:20px;background:var(--mint);font-size:clamp(20px,4vw,28px);margin-bottom:14px}
+.acts{display:flex;gap:12px;flex-wrap:wrap}
+.acts .btn{flex:1;min-width:150px;font-size:clamp(20px,4vw,28px);padding:16px}
+.ok{background:#8fe3ae!important;box-shadow:0 5px 0 #5cc283!important}
+.no{background:#ffb4b4!important;box-shadow:0 5px 0 #e68585!important}
+.win-box{text-align:center}
+.win-box .big{font-family:'Geeza Pro','Segoe UI','Noto Sans Arabic','Noto Naskh Arabic',Tahoma,Arial,sans-serif;font-size:clamp(90px,24vw,190px);line-height:1}
+.win-box h2{font-family:'Geeza Pro','Segoe UI','Noto Sans Arabic','Noto Naskh Arabic',Tahoma,Arial,sans-serif;font-weight:800;font-size:clamp(34px,7vw,60px);margin:6px 0 18px}
+.conf{position:fixed;top:-20px;width:12px;height:18px;z-index:40;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+/* editor */
+.ed{align-items:flex-start}
+.ed .modal{width:min(100%,860px)}
+.ed h2{font-family:'Geeza Pro','Segoe UI','Noto Sans Arabic','Noto Naskh Arabic',Tahoma,Arial,sans-serif;font-weight:800;font-size:36px;margin:0 0 10px}
+.rule{background:var(--card);border:3px solid var(--line);border-radius:20px;padding:12px 16px;margin-bottom:14px;font-size:18px}
+.rule label{margin-inline-end:14px;white-space:nowrap}
+.qc{border:3px solid var(--line);border-radius:24px;padding:14px;margin-bottom:14px;background:var(--card)}
+.qc .top{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.num{background:var(--sun);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.top .sp{flex:1}
+textarea,input[type=text],select{width:100%;font:inherit;font-weight:500;font-size:18px;padding:10px 14px;border-radius:14px;border:3px solid var(--line);background:#fff;color:var(--ink)}
+textarea{min-height:80px;resize:vertical}
+.orow{display:flex;align-items:center;gap:8px;margin-top:8px}
+.orow input[type=radio]{width:24px;height:24px;accent-color:#3fb36f;flex:none}
+.lbl{font-size:16px;margin:10px 0 4px;opacity:.8}
+.thumb{max-height:90px;border-radius:12px;border:2px solid var(--line);vertical-align:middle;margin-inline-end:10px}
+.edfoot{display:flex;gap:10px;flex-wrap:wrap;position:sticky;bottom:0;background:#fff;padding-top:10px}
+.brand{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;margin-top:4px}
+.brand b{font-size:clamp(20px,4vw,26px);color:var(--ink)}
+.brand span{font-size:clamp(14px,2.8vw,17px);opacity:.8;font-weight:500}
+.brand small{font-size:clamp(13px,2.6vw,15px);color:var(--o)}
+.credit{text-align:center;margin-top:14px;font-size:14px;color:var(--o);opacity:.9}
+.about h2,.card .ctitle{font-weight:800;margin:0 0 12px;font-size:clamp(24px,5vw,32px)}
+.about dl{margin:0}.about dt{font-size:17px;color:var(--o);margin-top:12px}
+.about dd{margin:2px 0 0;font-size:clamp(16px,3.4vw,19px);font-weight:500;line-height:1.8}
+.about ul{margin:0;padding-inline-start:22px}
+.about .by{text-align:center;font-size:15px;color:var(--o);margin:16px 0}
+.card .ctab{width:100%;border-collapse:collapse;margin-bottom:14px}
+.card th,.card td{border:2px solid var(--line);padding:9px 12px;text-align:right;font-size:clamp(15px,3.2vw,18px);vertical-align:top}
+.card th{background:#fff7e6;width:34%;font-weight:800}.card td{font-weight:500}
+.card .cdesc{font-size:clamp(15px,3.2vw,18px);line-height:1.9;font-weight:500;margin:0 0 12px}
+.card .cnote{font-size:14px;line-height:1.8;font-weight:500;color:#6b6585;border-top:2px solid var(--line);padding-top:10px;margin:0 0 14px}
+@media print{
+ html,body,body.cardopen{background:#fff!important;background-image:none!important}
+ body.cardopen .wrap,body.cardopen .ov:not(#ovC),body.cardopen .conf,body.cardopen .err{display:none!important}
+ body.cardopen #ovC{position:static;display:block;background:#fff;padding:0;overflow:visible}
+ #ovC .modal{box-shadow:none;border:2px solid #cfd8e3;border-radius:12px;max-height:none;width:100%;animation:none;overflow:visible}
+ .noprint{display:none!important}
+ @page{margin:14mm}
+}
+:focus-visible{outline:4px solid #7a5cff;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<noscript><div style="padding:16px;margin:12px;background:#fff3cf;border-radius:16px;font-size:20px;text-align:center">هذه الصفحة تحتاج تشغيل JavaScript. افتحي الملف في Safari أو Chrome مباشرة، وليس من نافذة معاينة.</div></noscript>
+<div class="wrap">
+  <header>
+    <h1>تحدي <span class="x">X</span><span class="o">O</span> – العب وتعلّم</h1>
+    <div class="tools">
+      <button class="btn" id="bAbout">ℹ️ عن اللعبة</button>
+      <button class="btn blue" id="bSetup">⚙️ إعداد الأسئلة</button>
+      <button class="btn mint" id="bNew">♻️ إعادة اللعبة</button>
+    </div>
+  </header>
+  <div class="brand"><b>XO التعليمية</b><span>لعبة تفاعلية ذكية للمراجعة والتقويم التعليمي</span><small>إعداد وتطوير تربوي: المعلمة وهايب محمد</small></div>
+  <div class="turn"><div class="chip X" id="cX">دور X</div><div class="chip O" id="cO">دور O</div></div>
+  <div class="board" id="board"></div>
+  <div class="hint">اضغطي على أي مربع لعرض سؤاله</div>
+  <footer class="credit">إعداد وتطوير تربوي: المعلمة وهايب محمد</footer>
+</div>
+
+<div class="ov" id="ovA"><div class="modal about" id="mA">
+<h2>عن اللعبة</h2>
+<dl>
+<dt>اسم المنتج</dt><dd>XO التعليمية</dd>
+<dt>نوع المنتج</dt><dd>مورد تعليمي رقمي تفاعلي</dd>
+<dt>مجال الاستخدام</dt><dd>التعليم والتعلم، المراجعة، التقويم التكويني، وتنمية التفكير.</dd>
+<dt>فكرة المنتج</dt><dd>لعبة تعليمية تفاعلية توظف استراتيجية XO في تقديم الأسئلة التعليمية، بحيث تتيح للمعلمة إدخال الأسئلة وتخصيصها، ثم عرضها على الطالبات أثناء اللعب، وتحديد صحة الإجابة، ومنح العلامات وفقًا لقواعد اللعبة.</dd>
+<dt>الهدف التربوي</dt><dd>تقديم تجربة تعلم ممتعة وتفاعلية تساعد على استرجاع المعلومات، وتنمية التفكير، وتعزيز المشاركة والتفاعل، وتقديم تغذية راجعة فورية أثناء المراجعة والتقويم.</dd>
+<dt>خصائص المنتج</dt><dd><ul><li>إمكانية إعداد تسعة أسئلة مستقلة.</li><li>إمكانية تعديل الأسئلة وحذفها وإعادة ترتيبها.</li><li>دعم الأسئلة المفتوحة وأسئلة الاختيار من متعدد.</li><li>إمكانية إضافة صور للأسئلة.</li><li>تحكم المعلمة في تصحيح الإجابات.</li><li>احتساب العلامات وإظهار نتيجة اللعبة.</li><li>إمكانية إعادة اللعب مع الاحتفاظ بالأسئلة.</li></ul></dd>
+</dl>
+<p class="by">إعداد وتطوير تربوي: المعلمة وهايب محمد</p>
+<div class="acts"><button class="btn mint" id="aCard">📄 بطاقة التوثيق</button><button class="btn" id="aClose">إغلاق</button></div>
+</div></div>
+<div class="ov" id="ovC"><div class="modal card" id="mC">
+<div class="ctitle">بطاقة توثيق المنتج التعليمي الرقمي</div>
+<table class="ctab"><tr><th>اسم المنتج</th><td>XO التعليمية</td></tr><tr><th>تصنيف المنتج</th><td>مورد تعليمي رقمي تفاعلي</td></tr><tr><th>طبيعة المنتج</th><td>لعبة تعليمية قابلة للتخصيص وإعادة الاستخدام</td></tr><tr><th>مجال التطبيق</th><td>المراجعة والتقويم التعليمي</td></tr><tr><th>إعداد الفكرة والتصميم التربوي</th><td>المعلمة وهايب محمد</td></tr><tr><th>التطوير التقني</th><td>بمساعدة أدوات الذكاء الاصطناعي</td></tr><tr><th>الفئة المستفيدة</th><td>المعلمات والطلاب والطالبات</td></tr><tr><th>الاستخدام</th><td>داخل الصف أو في التعليم عن بُعد</td></tr><tr><th>إمكانية التطوير</th><td>قابلة لإضافة أسئلة ومحتوى تعليمي جديد بما يتناسب مع الدروس والمقررات المختلفة</td></tr></table>
+<p class="cdesc">«يمثل هذا المنتج نموذجًا لمورد تعليمي رقمي تفاعلي، يقوم على توظيف استراتيجية اللعب في المراجعة والتقويم، من خلال تصميم تربوي يتيح للمعلمة تخصيص المحتوى والأسئلة والتحكم في سير التفاعل، بما يدعم تنويع أساليب التدريس والتقويم.»</p>
+<p class="cnote">«يُرجى الإشارة إلى إعداد المنتج وتطويره التربوي عند إعادة استخدامه أو مشاركته، مع مراعاة حقوق الأدوات والمكونات التقنية والأطراف الأخرى المستخدمة في تطويره.»</p>
+<div class="acts noprint"><button class="btn mint" id="cPrint">🖨️ طباعة بطاقة التوثيق</button><button class="btn" id="cClose">إغلاق</button></div>
+</div></div>
+<div class="ov" id="ovQ"><div class="modal" id="mQ"></div></div>
+<div class="ov" id="ovW"><div class="modal win-box" id="mW"></div></div>
+<div class="ov ed" id="ovE"><div class="modal" id="mE"></div></div>
+
+<script>
+(function(){
+window.addEventListener('error',function(e){var d=document.createElement('div');d.className='err';d.textContent='حدث خطأ برمجي: '+e.message;document.body.appendChild(d)});
+var KEY='xo-challenge-v1';
+var S={qs:[],wrongPass:true};
+var board,turn,over,cur,reveal;
+var LINES=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+function arm(b){if(b.dataset.arm)return true;b.dataset.arm='1';b._t=b.textContent;b.textContent='اضغطي مرة أخرى للتأكيد';setTimeout(function(){if(b.dataset.arm){delete b.dataset.arm;b.textContent=b._t}},3000);return false}
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function load(){try{var d=JSON.parse(localStorage.getItem(KEY));if(d&&d.qs){S=d}}catch(e){}norm()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function blank(){return {text:'',type:'open',opts:['','','',''],correct:0,answer:'',img:''}}
+function hasQ(i){var q=S.qs[i];return !!(q&&(q.text.trim()||q.img))}
+function norm(){
+  var a=[];
+  for(var i=0;i<9;i++){var q=S.qs[i]||{},b=blank();
+    b.text=q.text||'';b.type=q.type==='mc'?'mc':'open';
+    if(q.opts){for(var k=0;k<4;k++)b.opts[k]=q.opts[k]||''}
+    b.correct=+q.correct||0;b.answer=q.answer||'';b.img=q.img||'';a.push(b)}
+  S.qs=a;
+}
+
+/* sound */
+var AC;
+function tone(f,d,t,v){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();var o=AC.createOscillator(),g=AC.createGain();o.type=t||'sine';o.frequency.value=f;g.gain.value=v||.15;o.connect(g);g.connect(AC.destination);var n=AC.currentTime;g.gain.setValueAtTime(v||.15,n);g.gain.exponentialRampToValueAtTime(.001,n+d);o.start(n);o.stop(n+d)}catch(e){}}
+function seq(a){a.forEach(function(x,i){setTimeout(function(){tone(x[0],x[1],x[2])},i*x[3])})}
+var snd={
+ ok:function(){seq([[660,.15,'triangle',0],[880,.25,'triangle',130]])},
+ no:function(){seq([[300,.2,'sawtooth',0],[220,.3,'sawtooth',160]])},
+ win:function(){seq([[523,.2,'triangle',0],[659,.2,'triangle',160],[784,.2,'triangle',320],[1047,.5,'triangle',480],[784,.2,'triangle',700],[1047,.6,'triangle',860]])},
+ tie:function(){seq([[440,.25,'sine',0],[392,.25,'sine',250],[349,.4,'sine',500]])}
+};
+
+/* board */
+function newGame(){board=Array(9).fill(null);turn='X';over=false;closeQ();$('ovW').classList.remove('show');render()}
+function render(win){
+  var h='';
+  for(var i=0;i<9;i++){
+    var v=board[i],has=hasQ(i);
+    h+='<button class="cell '+(v||'')+(win&&win.indexOf(i)>-1?' win':'')+'" data-i="'+i+'" '+(v||over?'disabled':'')+' aria-label="المربع '+(i+1)+'">'
+      +(v?v:'<span class="n">'+(i+1)+'</span><span class="q">'+(has?'؟':'')+'</span>')+'</button>';
+  }
+  $('board').innerHTML=h;
+  $('cX').classList.toggle('on',turn==='X'&&!over);
+  $('cO').classList.toggle('on',turn==='O'&&!over);
+}
+$('board').addEventListener('click',function(e){
+  var b=e.target.closest('.cell');if(!b||b.disabled||over)return;
+  openQ(+b.dataset.i);
+});
+
+/* question modal */
+function openQ(i){cur=i;reveal=false;drawQ();$('ovQ').classList.add('show')}
+function closeQ(){$('ovQ').classList.remove('show');cur=null}
+function drawQ(){
+  var q=hasQ(cur)?S.qs[cur]:null,h='<div class="qtag '+turn+'">المربع '+(cur+1)+' • دور '+turn+'</div>';
+  if(q){
+    h+='<div class="qtext">'+esc(q.text)+'</div>';
+    if(q.img)h+='<img class="qimg" src="'+q.img+'" alt="">';
+    if(q.type==='mc'){
+      h+='<div class="opts">';
+      q.opts.forEach(function(o,k){if(o.trim())h+='<div class="opt'+(reveal&&k===q.correct?' show':'')+'">'+['أ','ب','ج','د'][k]+') '+esc(o)+(reveal&&k===q.correct?' ✔':'')+'</div>'});
+      h+='</div>';
+    }else if(reveal&&q.answer){h+='<div class="ans">الإجابة: '+esc(q.answer)+'</div>'}
+    h+='<div style="margin-bottom:14px"><button class="btn sm" id="bRev">'+(reveal?'إخفاء الإجابة الصحيحة':'👁 عرض الإجابة الصحيحة (لك فقط)')+'</button></div>';
+  }else{
+    h+='<div class="qtext">لا يوجد سؤال لهذا المربع. يمكنك إضافته من «إعداد الأسئلة»، أو الحكم مباشرة.</div>';
+  }
+  h+='<div class="acts"><button class="btn ok" id="bOk">✅ إجابة صحيحة</button><button class="btn no" id="bNo">❌ إجابة غير صحيحة</button></div>'
+    +'<div style="margin-top:12px"><button class="btn sm" id="bBack">إغلاق دون حكم</button></div>';
+  $('mQ').innerHTML=h;
+  var r=$('bRev');if(r)r.onclick=function(){reveal=!reveal;drawQ()};
+  $('bOk').onclick=correct;$('bNo').onclick=wrong;$('bBack').onclick=closeQ;
+}
+function correct(){
+  board[cur]=turn;snd.ok();closeQ();
+  var w=winner();
+  if(w){over=true;render(w.line);setTimeout(function(){showWin(w.who)},900);return}
+  if(board.every(Boolean)){over=true;render();setTimeout(showTie,700);return}
+  turn=turn==='X'?'O':'X';render();
+}
+function wrong(){
+  snd.no();closeQ();
+  if(S.wrongPass)turn=turn==='X'?'O':'X';
+  render();
+}
+function winner(){
+  for(var k=0;k<LINES.length;k++){var l=LINES[k];if(board[l[0]]&&board[l[0]]===board[l[1]]&&board[l[1]]===board[l[2]])return{who:board[l[0]],line:l}}
+  return null;
+}
+function showWin(w){
+  var c=w==='X'?'var(--x)':'var(--o)';
+  $('mW').innerHTML='<div class="big" style="color:'+c+'">'+w+'</div><h2>🎉 مبروك! فاز فريق '+w+' 🎉</h2><div class="acts"><button class="btn mint" id="wNew">لعبة جديدة</button><button class="btn" id="wClose">عرض اللوحة</button></div>';
+  $('ovW').classList.add('show');snd.win();confetti();
+  $('wNew').onclick=newGame;$('wClose').onclick=function(){$('ovW').classList.remove('show')};
+}
+function showTie(){
+  $('mW').innerHTML='<div class="big">🤝</div><h2>تعادل! أحسنتم جميعًا</h2><div class="acts"><button class="btn mint" id="wNew">لعبة جديدة</button><button class="btn" id="wClose">عرض اللوحة</button></div>';
+  $('ovW').classList.add('show');snd.tie();
+  $('wNew').onclick=newGame;$('wClose').onclick=function(){$('ovW').classList.remove('show')};
+}
+function confetti(){
+  var cols=['#ff6b8b','#2bb3c9','#ffd166','#7bd99b','#b38cff'];
+  for(var i=0;i<70;i++){
+    var d=document.createElement('div');d.className='conf';
+    d.style.left=Math.random()*100+'vw';d.style.background=cols[i%5];
+    d.style.animationDuration=(2+Math.random()*2.5)+'s';d.style.animationDelay=Math.random()*.8+'s';
+    d.style.borderRadius=Math.random()>.5?'50%':'3px';
+    document.body.appendChild(d);setTimeout(function(n){n.remove()},5500,d);
+  }
+}
+
+/* editor */
+function openEd(){drawEd();$('ovE').classList.add('show')}
+function drawEd(){
+  var h='<h2>⚙️ إعداد الأسئلة</h2>'
+   +'<div class="rule"><b>عند الإجابة الخاطئة:</b> المربع يبقى متاحًا. &nbsp; '
+   +'<label><input type="radio" name="wp" value="1" '+(S.wrongPass?'checked':'')+'> ينتقل الدور للفريق الآخر</label>'
+   +'<label><input type="radio" name="wp" value="0" '+(!S.wrongPass?'checked':'')+'> يبقى الدور كما هو</label></div>'
+   +'<div class="lbl">لكل مربع من التسعة حقل سؤال خاص به. اكتبي فقط في المربعات التي تريدينها، وتُحفظ الأسئلة تلقائيًا.</div>';
+  S.qs.forEach(function(q,i){
+    h+='<div class="qc" data-i="'+i+'"><div class="top"><div class="num">'+(i+1)+'</div><b>سؤال المربع '+(i+1)+'</b><div class="sp"></div>'
+     +'<button class="btn sm" data-a="up" '+(i===0?'disabled':'')+'>⬆️</button>'
+     +'<button class="btn sm" data-a="dn" '+(i===8?'disabled':'')+'>⬇️</button>'
+     +'<button class="btn sm pink" data-a="del">🗑 مسح السؤال</button></div>'
+     +'<textarea data-f="text" placeholder="اكتبي سؤال المربع '+(i+1)+' هنا">'+esc(q.text)+'</textarea>'
+     +'<div class="lbl">نوع السؤال</div><select data-f="type"><option value="open"'+(q.type==='open'?' selected':'')+'>سؤال مفتوح (إجابة شفهية)</option><option value="mc"'+(q.type==='mc'?' selected':'')+'>اختيار من متعدد</option></select>';
+    if(q.type==='mc'){
+      h+='<div class="lbl">الخيارات (حددي الإجابة الصحيحة بالدائرة)</div>';
+      for(var k=0;k<4;k++)h+='<div class="orow"><input type="radio" name="c'+i+'" data-f="correct" value="'+k+'" '+(q.correct===k?'checked':'')+'><input type="text" data-f="opt" data-k="'+k+'" value="'+esc(q.opts[k])+'" placeholder="الخيار '+['أ','ب','ج','د'][k]+'"></div>';
+    }else{
+      h+='<div class="lbl">الإجابة الصحيحة (اختياري، تظهر لك فقط)</div><input type="text" data-f="answer" value="'+esc(q.answer)+'">';
+    }
+    h+='<div class="lbl">صورة للسؤال (اختياري)</div>'+(q.img?'<img class="thumb" src="'+q.img+'" alt=""><button class="btn sm pink" data-a="rmimg">إزالة الصورة</button>':'<input type="file" accept="image/*" data-f="img">')+'</div>';
+  });
+  h+='<div class="edfoot"><button class="btn pink" id="eClear">مسح كل الأسئلة</button><button class="btn" id="eDone">✔ حفظ وإغلاق</button></div>';
+  var sc=$('ovE').scrollTop;
+  $('mE').innerHTML=h;$('ovE').scrollTop=sc;
+}
+var mE=$('mE');
+mE.addEventListener('input',function(e){
+  var t=e.target,f=t.dataset.f,c=t.closest('.qc');
+  if(t.name==='wp'){S.wrongPass=t.value==='1';save();return}
+  if(!f||!c)return;var q=S.qs[+c.dataset.i];
+  if(f==='text')q.text=t.value;
+  else if(f==='answer')q.answer=t.value;
+  else if(f==='opt')q.opts[+t.dataset.k]=t.value;
+  else if(f==='correct')q.correct=+t.value;
+  save();
+});
+mE.addEventListener('change',function(e){
+  var t=e.target,f=t.dataset.f,c=t.closest('.qc');
+  if(t.name==='wp'){S.wrongPass=t.value==='1';save();return}
+  if(!c)return;var q=S.qs[+c.dataset.i];
+  if(f==='type'){q.type=t.value;save();drawEd()}
+  if(f==='img'&&t.files[0]){
+    var r=new FileReader();r.onload=function(){
+      var im=new Image();im.onload=function(){
+        var m=700,s=Math.min(1,m/Math.max(im.width,im.height)),cv=document.createElement('canvas');
+        cv.width=im.width*s;cv.height=im.height*s;cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
+        q.img=cv.toDataURL('image/jpeg',.8);save();drawEd();
+      };im.src=r.result};
+    r.readAsDataURL(t.files[0]);
+  }
+});
+mE.addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;
+  var c=b.closest('.qc'),i=c?+c.dataset.i:-1,a=b.dataset.a;
+  if(a==='up'&&i>0){var x=S.qs[i];S.qs[i]=S.qs[i-1];S.qs[i-1]=x}
+  else if(a==='dn'&&i<8){var y=S.qs[i];S.qs[i]=S.qs[i+1];S.qs[i+1]=y}
+  else if(a==='del'){if(!arm(b))return;S.qs[i]=blank()}
+  else if(a==='rmimg'){S.qs[i].img=''}
+  else if(b.id==='eClear'){if(!arm(b))return;S.qs=[];norm()}
+  else if(b.id==='eDone'){save();$('ovE').classList.remove('show');render();return}
+  else return;
+  save();drawEd();
+});
+
+function openCard(){$('ovC').classList.add('show');document.body.classList.add('cardopen')}
+function closeCard(){$('ovC').classList.remove('show');document.body.classList.remove('cardopen')}
+$('bAbout').onclick=function(){$('ovA').classList.add('show')};
+$('aClose').onclick=function(){$('ovA').classList.remove('show')};
+$('aCard').onclick=function(){$('ovA').classList.remove('show');openCard()};
+$('cClose').onclick=closeCard;
+var pr=0;$('cPrint').onclick=function(){if(pr)return;pr=1;setTimeout(function(){pr=0},1500);window.print()};
+$('bSetup').onclick=openEd;
+$('bNew').onclick=newGame;
+norm();load();newGame();
+})();
+</script>
+</body>
+</html>
